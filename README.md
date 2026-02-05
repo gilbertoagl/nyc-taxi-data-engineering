@@ -6,7 +6,7 @@ This project demonstrates an **End-to-End Data Engineering Pipeline** built enti
 The system processes large datasets using **Apache Spark** and optimizes data availability for reporting via **Direct Lake** in Power BI, ensuring high performance without data duplication.
 
 ## Architecture
-![Architecture Diagram](architecture.png)
+![Architecture Diagram](Fabric_Project_Diagram.png)
 *(Logical Solution Architecture)*
 
 ## Tech Stack
