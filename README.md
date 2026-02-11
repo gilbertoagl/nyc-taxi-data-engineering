@@ -97,6 +97,7 @@ During the visualization phase, I identified that generic location names caused 
 ```python
 # Enriching location names for accurate geocoding
 df_zone = df_zone.withColumn("full_location", concat(col("zone_name"), lit(", New York, NY, USA")))
+```
 ---
 
 ## Repository Structure
