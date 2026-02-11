@@ -52,7 +52,7 @@ Physical data organization is managed within a Fabric Lakehouse. I maintained a 
 ---
 
 ## Orchestration: Metadata Driven Pipeline
-The ETL process is fully automated and metadata-driven. Instead of hardcoding separate flows for Yellow and Green taxi data, I implemented a **Dynamic Parameterized Pattern**. This allowed me to process multiple datasets using a single, reusable pipeline logic.
+The ETL process is fully automated and metadata driven. Instead of hardcoding separate flows for Yellow and Green taxi data, I implemented a **Dynamic Parameterized Pattern**. This allowed me to process multiple datasets using a single and reusable pipeline logic.
 
 ![Pipeline Overview](assets/pipeline_orchestration.png)
 
@@ -61,7 +61,7 @@ The pipeline is triggered by a JSON Array parameter that defines the specific ba
 ![Config Array](assets/pipeline_config_array.png)
 
 ### 2. Iteration Logic
-A `ForEach` activity iterates through the array, triggering parallel notebook executions to optimize processing time.
+A ForEach activity iterates through the array, triggering parallel notebook executions to optimize processing time.
 ![Loop Logic](assets/pipeline_config_loop.png)
 
 ### 3. Context Injection
@@ -73,7 +73,7 @@ Using dynamic expressions, the pipeline injects context-specific variables direc
 ## Code Implementation Details
 
 ### Incremental Loading (SCD Type 1)
-To prevent data duplication during re-runs, the Silver layer utilizes Delta Lake's `MERGE` operation. This ensures that the pipeline is idempotent and it updates existing records and inserts new ones based on a unique `trip_id`.
+To prevent data duplication during re-runs, the Silver layer utilizes Delta Lake's "MERGE" operation. This ensures that the pipeline is idempotent and it updates existing records and inserts new ones based on a unique "trip_id".
 ![Delta Merge Logic](assets/code_silver_merge.png)
 
 ### Schema Normalization & Robustness
@@ -81,7 +81,7 @@ Different taxi providers often have slight schema variations. The transformation
 ![Schema Handling](assets/code_schema_handling.png)
 
 ### Storage Optimization (z-ORDER)
-To minimize latency for geospatial queries, Gold tables are optimized using **z-Order Clustering** on the `pickup_zone_id`. This physically rearranges the data in storage to allow Spark to skip irrelevant file blocks, significantly speeding up the dashboard filters.
+To minimize latency for geospatial queries, Gold tables are optimized using **z-Order Clustering** on the 'pickup_zone_id'. This physically rearranges the data in storage to allow Spark to skip irrelevant file blocks, significantly speeding up the dashboard filters.
 ![Optimization](assets/code_gold_optimization.png)
 
 ---
@@ -92,4 +92,4 @@ To minimize latency for geospatial queries, Gold tables are optimized using **z-
 * `assets/`: Project documentation, diagrams, and evidence.
 
 ---
-**Developed by Gilberto Agramont** [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gilberto-agramont-cloud/)
+**Developed by Gilberto Agramont**     [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gilberto-agramont-cloud/)
