@@ -82,6 +82,7 @@ To prevent data duplication during re-runs, the Silver layer utilizes Delta Lake
 
 ### Schema Normalization & Robustness
 Different taxi providers often have slight schema variations. The transformation logic dynamically standardizes these differences into a unified Silver schema, making the pipeline robust against schema drift.
+
 ![Schema Handling](assets/code_schema_handling.png)
 
 ### Storage Optimization (z-ORDER)
