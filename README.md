@@ -22,6 +22,10 @@ The system follows a **Medallion Architecture** (Bronze, Silver, Gold). This app
 
 ![Architecture Diagram](assets/Fabric_Project_Diagram.png)
 
+The Microsoft Fabric workspace provides the integrated environment for managing the data pipeline, notebooks, and lakehouse assets:
+
+![Workspace View](assets/workspace_image.png)
+
 ---
 
 ## Data Modeling & Semantic Layer
@@ -92,4 +96,4 @@ To minimize latency for geospatial queries, Gold tables are optimized using **z-
 * `assets/`: Project documentation, diagrams, and evidence.
 
 ---
-**Developed by Gilberto Agramont**     [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gilberto-agramont-cloud/)
+**Developed by Gilberto Agramont** [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gilberto-agramont-cloud/)
