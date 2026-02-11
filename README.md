@@ -1,7 +1,7 @@
 # NYC Taxi Data Engineering: End-to-End Microsoft Fabric Solution
 
 ## Project Overview
-This repository implements a scalable data engineering pipeline capable of processing over **9.3 million records** of New York City Taxi trip data. Built on **Microsoft Fabric** and **PySpark**, the solution handles the full data lifecycle: ingestion, cleaning, transformation, and modeling into a Star Schema. The final output is a Power BI report using **Direct Lake** mode for high-performance analysis without data duplication.
+This repository implements a scalable data engineering pipeline designed to process and analyze over **9.3 million records** of New York City Taxi trip data. Built entirely on the **Microsoft Fabric** ecosystem using **PySpark**, the solution covers the full data lifecycle: from automated ingestion and multi-layer cleaning to dimensional modeling. The final output is a Power BI report leveraging **Direct Lake** mode, providing high-performance analytics by reading Delta tables directly from OneLake without data duplication.
 
 ![Dashboard Preview](assets/dashboard_main.png)
 
@@ -9,16 +9,16 @@ This repository implements a scalable data engineering pipeline capable of proce
 
 ## Tech Stack
 * **Orchestration:** Azure Data Factory (Fabric Pipelines)
-* **Processing:** Apache Spark (PySpark) on Fabric Capacity
-* **Storage:** Azure Data Lake Gen2 (Delta Lake format)
-* **Modeling:** Star Schema (Kimball Architecture)
+* **Processing:** Apache Spark (PySpark) 
+* **Storage:** Azure Data Lake Gen2 with Delta Lake format
+* **Modeling:** Star Schema
 * **Optimization:** Z-ORDER Clustering & V-Order
 * **Reporting:** Power BI (Direct Lake mode)
 
 ---
 
 ## Architecture
-The system follows a **Medallion Architecture** (Bronze, Silver, Gold) to structure the data flow from external APIs to the analytical layer.
+The system follows a **Medallion Architecture** (Bronze, Silver, Gold). This approach ensures that data is incrementally refined from raw, immutable files to cleaned transformation layers and, finally, to business-ready analytical models.
 
 ![Architecture Diagram](assets/Fabric_Project_Diagram.png)
 
@@ -27,48 +27,45 @@ The system follows a **Medallion Architecture** (Bronze, Silver, Gold) to struct
 ## Data Modeling & Semantic Layer
 
 ### Star Schema
-To optimize query performance for the Direct Lake report, the data is modeled into a strict Star Schema. This design reduces join complexity and enables fast aggregation on the Fabric backend.
+To ensure fast query response times in Power BI, the Gold layer is structured as a Star Schema. This design minimizes join complexity during analysis and allows the Fabric SQL engine to aggregate millions of rows efficiently.
 
 ![Star Schema](assets/starSchema_model.png)
 
-* **Fact Table:** `fact_trips` (Partitioned by Date)
+* **Fact Table:** `fact_trips` Partitioned by date
 * **Dimensions:** `dim_date`, `dim_zone`, `dim_payment_type`
 
 ### Business Logic (DAX)
-Business logic is encapsulated within the Semantic Layer using DAX measures, ensuring consistent KPI definitions across all reporting views.
+Core business logic and KPIs, such as **Revenue per Mile** and **Average Speed**, are encapsulated within the Semantic Layer using DAX. This centralizes the calculation logic, ensuring consistency across all report views.
 
 ![DAX Measures](assets/measures_factTable.png)
 
 ---
 
 ## Lakehouse Storage Structure
-Data is physically organized in Microsoft Fabric's OneLake, maintaining a clear separation between raw files and managed tables.
+Physical data organization is managed within a Fabric Lakehouse. I maintained a strict separation between the file based landing zone and the managed Delta tables to support both data science and BI workloads.
 
 ![Lakehouse Structure](assets/lakehouse_files.png)
 
-* **Files (Bronze Layer):** Raw Parquet files stored hierarchically.
-* **Tables (Silver & Gold Layers):** Managed Delta Tables optimized for Spark and SQL endpoints.
+* **Files (Bronze Layer):** Raw Parquet files stored in a hierarchical folder structure.
+* **Tables (Silver & Gold Layers):** Managed Delta Tables optimized for high-concurrency reading.
 
 ---
 
-## Orchestration: Metadata-Driven Pipeline
-The ETL process avoids hardcoded logic. It uses a **Dynamic Parameterized Pattern** to handle multiple datasets (Yellow and Green taxis) within a single pipeline structure.
+## Orchestration: Metadata Driven Pipeline
+The ETL process is fully automated and metadata-driven. Instead of hardcoding separate flows for Yellow and Green taxi data, I implemented a **Dynamic Parameterized Pattern**. This allowed me to process multiple datasets using a single, reusable pipeline logic.
 
 ![Pipeline Overview](assets/pipeline_orchestration.png)
 
 ### 1. Configuration Array
-The pipeline accepts a JSON Array parameter to define the execution batch dynamically.
-
+The pipeline is triggered by a JSON Array parameter that defines the specific batches (Taxi Type and Date) to be processed.
 ![Config Array](assets/pipeline_config_array.png)
 
 ### 2. Iteration Logic
-A `ForEach` activity iterates through the configuration array, triggering parallel execution for different datasets.
-
+A `ForEach` activity iterates through the array, triggering parallel notebook executions to optimize processing time.
 ![Loop Logic](assets/pipeline_config_loop.png)
 
 ### 3. Context Injection
-Dynamic expressions inject pipeline parameters directly into the Spark Notebook variables at runtime.
-
+Using dynamic expressions, the pipeline injects context-specific variables directly into the Spark Notebook's parameter cells at runtime.
 ![Parameter Mapping](assets/pipeline_config_mapping.png)
 
 ---
@@ -76,26 +73,23 @@ Dynamic expressions inject pipeline parameters directly into the Spark Notebook 
 ## Code Implementation Details
 
 ### Incremental Loading (SCD Type 1)
-To ensure data integrity, the Silver layer implements Delta Lake's `MERGE` operation. This logic updates existing records if the `trip_id` matches and inserts new ones, preventing duplicates during re-runs.
-
+To prevent data duplication during re-runs, the Silver layer utilizes Delta Lake's `MERGE` operation. This ensures that the pipeline is idempotent and it updates existing records and inserts new ones based on a unique `trip_id`.
 ![Delta Merge Logic](assets/code_silver_merge.png)
 
-### Schema Normalization
-The pipeline dynamically handles schema drift between taxi types (e.g., standardizing `tpep_pickup_datetime` vs `lpep_pickup_datetime`), allowing a single notebook to process multiple sources without failure.
-
+### Schema Normalization & Robustness
+Different taxi providers often have slight schema variations. The transformation logic dynamically standardizes these differences into a unified Silver schema, making the pipeline robust against schema drift.
 ![Schema Handling](assets/code_schema_handling.png)
 
-### Storage Optimization
-Gold tables are optimized using **Z-ORDER Clustering** on the `pickup_zone_id` column. This physical data arrangement minimizes the amount of data read during queries by skipping irrelevant file blocks.
-
+### Storage Optimization (z-ORDER)
+To minimize latency for geospatial queries, Gold tables are optimized using **z-Order Clustering** on the `pickup_zone_id`. This physically rearranges the data in storage to allow Spark to skip irrelevant file blocks, significantly speeding up the dashboard filters.
 ![Optimization](assets/code_gold_optimization.png)
 
 ---
 
 ## Repository Structure
 * `src/`: PySpark Notebooks for Bronze, Silver, and Gold layers.
-* `reports/`: Power BI file (.pbix).
-* `assets/`: Project documentation images.
+* `reports/`: Power BI file optimized for Direct Lake and its PDF.
+* `assets/`: Project documentation, diagrams, and evidence.
 
 ---
-*Developed by Gilberto Agramont*
+**Developed by Gilberto Agramont** [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/gilberto-agramont-cloud/)
