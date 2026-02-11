@@ -78,6 +78,7 @@ Using dynamic expressions, the pipeline injects context-specific variables direc
 
 ### Incremental Loading (SCD Type 1)
 To prevent data duplication during re-runs, the Silver layer utilizes Delta Lake's "MERGE" operation. This ensures that the pipeline is idempotent and it updates existing records and inserts new ones based on a unique "trip_id".
+
 ![Delta Merge Logic](assets/code_silver_merge.png)
 
 ### Schema Normalization & Robustness
@@ -87,8 +88,15 @@ Different taxi providers often have slight schema variations. The transformation
 
 ### Storage Optimization (z-ORDER)
 To minimize latency for geospatial queries, Gold tables are optimized using **z-Order Clustering** on the 'pickup_zone_id'. This physically rearranges the data in storage to allow Spark to skip irrelevant file blocks, significantly speeding up the dashboard filters.
+
 ![Optimization](assets/code_gold_optimization.png)
 
+### Geospatial Data Enrichment
+During the visualization phase, I identified that generic location names caused geocoding ambiguities in Azure Maps, occasionally placing data points in incorrect international locations. To resolve this, I implemented a transformation in the Gold layer to concatenate specific geographic context to each zone name, ensuring accurate rendering within New York City.
+
+```python
+# Enriching location names for accurate geocoding
+df_zone = df_zone.withColumn("full_location", concat(col("zone_name"), lit(", New York, NY, USA")))
 ---
 
 ## Repository Structure
